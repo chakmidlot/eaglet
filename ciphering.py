@@ -1,7 +1,4 @@
-import base64
-
 from Crypto.Cipher import AES
-from Crypto import Random
 from Crypto.Hash.MD5 import MD5Hash
 from Crypto.Hash.SHA256 import SHA256Hash
 
