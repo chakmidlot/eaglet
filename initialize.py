@@ -1,18 +1,9 @@
-def synchronize(decrypted_storage, encrypted_storage, decrypted_folder, encrypted_folder):
-    decripted_files = [x.name for x in decrypted_folder.iterdir() if not x.is_dir() and not str(x).startswith('.')]
-    encrypted_files = [x.name for x in encrypted_folder.iterdir() if not x.is_dir() and not str(x).startswith('.')]
+def synchronize(merger, decrypted_storage, encrypted_storage):
+    decrypted_files = set(decrypted_storage.get_file_names())
+    encrypted_files = set(encrypted_storage.get_file_names())
 
-    for file_path in set(decripted_files).intersection(encrypted_files):
-        if (decrypted_folder / file_path).stat().st_mtime >= (encrypted_folder / file_path).stat().st_mtime:
-            decrypted_storage.copy(decrypted_folder / file_path)
-        else:
-            encrypted_storage.copy(encrypted_folder / file_path)
-
-    for file_path in set(decripted_files).difference(encrypted_files):
-        decrypted_storage.copy(decrypted_folder / file_path)
-
-    for file_path in set(encrypted_files).difference(decripted_files):
-        encrypted_storage.copy(encrypted_folder / file_path)
+    for file_name in encrypted_files.union(decrypted_files):
+        merger.merge(file_name)
 
 
 def init_folder(decrypted_folder, encrypted_folder):

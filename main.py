@@ -5,6 +5,7 @@ from pathlib import Path
 from ciphering import get_password_hash
 from folder_handler import DecryptedStorageHandler, EncryptedStorageHandler, Notifier
 from initialize import synchronize, init_folder
+from merging.replace_by_latest import MergingUsingLatest
 from utils import configure_logging, is_password_valid
 
 
@@ -21,13 +22,17 @@ def parse_args():
 
 
 def main():
+    decrypted_storage = DecryptedStorageHandler(folder=decrypted_folder, move_destination=encrypted_folder, password=password)
+    encrypted_storage = EncryptedStorageHandler(folder=encrypted_folder, move_destination=decrypted_folder, password=password)
+
+    merger = MergingUsingLatest(decrypted_storage, encrypted_storage)
+
     init_folder(decrypted_folder, encrypted_folder)
     logging.info('Checking password')
     if is_password_valid(password, decrypted_folder):
-        decrypted_storage = DecryptedStorageHandler(move_destination=encrypted_folder, password=password)
-        encrypted_storage = EncryptedStorageHandler(move_destination=decrypted_folder, password=password)
+
         logging.info('Synchronization')
-        synchronize(decrypted_storage, encrypted_storage, decrypted_folder, encrypted_folder)
+        synchronize(merger, decrypted_storage, encrypted_storage)
 
         logging.info('Monitoring')
         Notifier(decrypted_storage, decrypted_folder).start()

@@ -13,23 +13,31 @@ from utils import files_same
 
 class StorageHandler(pyinotify.ProcessEvent, metaclass=ABCMeta):
 
+    folder: Path = None
     move_destination: Path = None
     password = None
 
-    def my_init(self, move_destination=None, password=None):
+    def my_init(self, folder=None, move_destination=None, password=None):
+        self.folder = folder
         self.move_destination = move_destination
         self.password = password
 
     def process_IN_CLOSE_WRITE(self, event):
         path = Path(event.pathname)
-
         self.copy(path)
+
+    def get_file_names(self):
+        for file in self.folder.iterdir():
+            if not self.filtered_out(file):
+                yield file.name
 
     @abstractmethod
     def ciphering_stuff(self, path: Path):
         return b''
 
-    def copy(self, path):
+    def copy(self, name):
+        path = self.folder / name
+
         if not self.filtered_out(path):
 
             logging.info(f'Saving to {self.move_destination / path.name}')
