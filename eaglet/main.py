@@ -1,0 +1,50 @@
+import argparse
+import logging
+
+from eaglet.ciphering import Encryptor, Decriptor
+from eaglet.initialize import init_folder
+from eaglet.storage.folder import Folder
+from eaglet.utils import configure_logging, is_password_valid
+
+logger = logging.getLogger('eaglet')
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--password', required=True,
+                        help='password for ciphering')
+    parser.add_argument('-d', '--decrypted-storage', required=True,
+                        help='path to a storage with decrypted data')
+    parser.add_argument('-e', '--encrypted-storage', required=True,
+                        help='path to a storage with encrypted data')
+    parser.add_argument('-v', '--verbose', action='store_true',
+                        help='show debug log')
+
+    return parser.parse_args()
+
+
+def main():
+    init_folder(args.decrypted_storage, args.encrypted_storage)
+    if not is_password_valid(args.password, args.decrypted_storage):
+        logger.error("Invalid password")
+        logger.info('Exit')
+        return
+
+    listener1 = Folder(args.decrypted_storage, args.encrypted_storage, Encryptor(args.password).ciphering_file)
+    listener2 = Folder(args.encrypted_storage, args.decrypted_storage, Decriptor(args.password).ciphering_file)
+
+    listener1.start()
+    listener2.start()
+    try:
+        listener1.join()
+        listener2.join()
+    except KeyboardInterrupt:
+        logger.info('Exit')
+
+
+if __name__ == '__main__':
+    args = parse_args()
+    log_level = logging.DEBUG if args.verbose else logging.INFO
+    configure_logging(log_level)
+
+    main()

@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 
-from ciphering import get_sha_hash
+from eaglet.ciphering import get_sha_hash
 
 
 def files_same(file_a, file_b):
@@ -14,17 +14,17 @@ def files_same(file_a, file_b):
     return a.read_bytes() == b.read_bytes()
 
 
-def configure_logging():
-    rootLogger = logging.getLogger('')
-    rootLogger.setLevel(logging.DEBUG)
+def configure_logging(level):
+    rootLogger = logging.getLogger(__package__)
+    rootLogger.setLevel(level)
     console = logging.StreamHandler()
     console.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
     rootLogger.addHandler(console)
 
 
 def is_password_valid(password, decrypted_folder):
-    password_hash_path = decrypted_folder / '.config/password_hash'
-    password_hash = get_sha_hash(password)
+    password_hash_path = Path(decrypted_folder) / '.config/password_hash'
+    password_hash = get_sha_hash(password.encode())
     if not password_hash_path.exists():
         password_hash_path.write_text(password_hash)
         return True

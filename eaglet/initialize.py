@@ -1,3 +1,6 @@
+from pathlib import Path
+
+
 def synchronize(merger, decrypted_storage, encrypted_storage):
     decrypted_files = set(decrypted_storage.get_file_names())
     encrypted_files = set(encrypted_storage.get_file_names())
@@ -7,5 +10,5 @@ def synchronize(merger, decrypted_storage, encrypted_storage):
 
 
 def init_folder(decrypted_folder, encrypted_folder):
-    encrypted_folder.mkdir(parents=True, exist_ok=True)
-    (decrypted_folder / '.config').mkdir(parents=True, exist_ok=True)
+    Path(encrypted_folder).mkdir(parents=True, exist_ok=True)
+    (Path(decrypted_folder) / '.config').mkdir(parents=True, exist_ok=True)

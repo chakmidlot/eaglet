@@ -1,4 +1,5 @@
-import ciphering
+from eaglet import ciphering
+
 
 def test_hash():
     password_hash = ciphering.get_password_hash('atata')
